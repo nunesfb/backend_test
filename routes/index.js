@@ -2,10 +2,7 @@ const express = require('express');
 const routes = express.Router();
 const usersData = require('../data/users');
 const middlewares = require('../middlewares');
-
-//routes.use(middlewares.dummy);
-//routes.use(middlewares.logger);
-//routes.use(middlewares.auth);
+const {generateToken} = require('../utils/crypto');
 
 //routes.get('/users', middlewares.auth, function (req, res, next) {
 routes.get('/users', function (req, res, next) {
@@ -43,7 +40,7 @@ routes.post('/users', function (req, res) {
     //req.body.teste.name = 'teste';
     if (!id || !name || !email || !phone || !age || ! username) {
         // return res.status(400).json({ message: "Bad Request" });
-        throw { status: 400, message: "Bad Request"};
+        throw { status: 400, message: "Está faltando dados!"};
     }
 
     usersData.push({id, name, email, phone, age, username});
@@ -53,6 +50,10 @@ routes.post('/users', function (req, res) {
 routes.put('/users/:id', function (req, res) {
     const {id} = req.params;
     const {name, email, phone, age, username} = req.body;
+    if (username.length > 20) {
+        //return res.status(400).json({ message: "Dados incorretos!" });
+        throw { status: 400, message: "Está faltando dados!"};
+    }
 
     const userIndex = usersData.findIndex((user) => user.id === parseInt(id));
 
@@ -73,6 +74,21 @@ routes.delete('/users/:id', function (req, res) {
     usersData.splice(userIndex, 1);
 
     res.status(204).end();
+});
+
+routes.post('/login', function (req, res) {
+    const { email, password } = req.body;
+    if(email === 'teste@teste.com' && password === '1234'){
+        const token = generateToken();
+        res.status(200).json({token});
+    }
+    console.log(req.body)
+    res.status(401).end();
+});
+
+routes.get('/userauth', middlewares.auth, function (req, res, next) {
+    res.status(200).json(usersData);
+    next();
 });
 
 module.exports = routes;

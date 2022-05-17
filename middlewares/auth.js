@@ -1,11 +1,9 @@
 
 module.exports = (req, res, next) => {
-    console.log(`Estou no middleware auth: ${req.query.user}`);
     console.log(`Estou no middleware auth: ${req.headers.authorization}`);
-      if (req.query.user === 'batata') {
-        req.user = {
-          name: 'batata'
-        };
+      if (req.headers.authorization) {
+        //aqui seria onde ocorreria a validação do token
+        console.log(`token: ${req.headers.authorization}`)
       return next();
     }
   
